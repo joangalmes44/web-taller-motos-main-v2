@@ -53,47 +53,54 @@ class SupabaseBuilder implements PromiseLike<any[]> {
   onConflictDoNothing() { return this; }
   onConflictDoUpdate(_opts:any) { return this; }
 
-  private apply(query:any) {
+  private apply(query: any) {
     for (const c of this.filters) {
       if (!c) continue;
       if (typeof c === 'string') continue;
-      const field = typeof c.field==='string' ? c.field : c.field?.column;
+      const field = typeof c.field === 'string' ? c.field : c.field?.column;
       if (!field) continue;
-      if (c.kind==='eq') query=query.eq(field,c.value);
-      else if (c.kind==='ne') query=query.neq(field,c.value);
-      else if (c.kind==='gte') query=query.gte(field,c.value);
-      else if (c.kind==='gt') query=query.gt(field,c.value);
-      else if (c.kind==='lte') query=query.lte(field,c.value);
-      else if (c.kind==='lt') query=query.lt(field,c.value);
-      else if (c.kind==='in') query=query.in(field,c.value);
-      else if (c.kind==='notIn') query=query.not('id','in',`(${(c.value as any[]).join(',')})`);
-      else if (c.kind==='like') query=query.like(field,String(c.value).replaceAll('%','*'));
-      else if (c.kind==='and' && c.items) for (const nested of c.items) { const b=new SupabaseBuilder(this.client); b.filters=[nested]; query=b.apply(query); }
+      if (c.kind === 'eq' && typeof query.eq === 'function') query = query.eq(field, c.value);
+      else if (c.kind === 'ne' && typeof query.neq === 'function') query = query.neq(field, c.value);
+      else if (c.kind === 'gte' && typeof query.gte === 'function') query = query.gte(field, c.value);
+      else if (c.kind === 'gt' && typeof query.gt === 'function') query = query.gt(field, c.value);
+      else if (c.kind === 'lte' && typeof query.lte === 'function') query = query.lte(field, c.value);
+      else if (c.kind === 'lt' && typeof query.lt === 'function') query = query.lt(field, c.value);
+      else if (c.kind === 'in' && typeof query.in === 'function') query = query.in(field, c.value);
+      else if (c.kind === 'notIn' && typeof query.not === 'function') query = query.not('id', 'in', `(${(c.value as any[]).join(',')})`);
+      else if (c.kind === 'like' && typeof query.like === 'function') query = query.like(field, String(c.value).replaceAll('%', '*'));
+      else if (c.kind === 'and' && c.items) {
+        for (const nested of c.items) {
+          const b = new SupabaseBuilder(this.client);
+          b.filters = [nested];
+          query = b.apply(query);
+        }
+      }
     }
-    for (const o of this.order) query=query.order(o.field,{ascending:o.dir==='asc'});
-    if (this.limitValue) query=query.limit(this.limitValue);
+    if (this.mode === 'select') {
+      for (const o of this.order) {
+        if (o?.field && typeof query.order === 'function') {
+          query = query.order(o.field, { ascending: o.dir === 'asc' });
+        }
+      }
+      if (this.limitValue && typeof query.limit === 'function') {
+        query = query.limit(this.limitValue);
+      }
+    }
     return query;
   }
-  private project(rows:any[]) {
-    if (!this._projection || typeof this._projection !== 'object') return rows;
-    return rows.map(row => {
-      const out:any={};
-      for (const [alias, spec] of Object.entries(this._projection)) {
-        if (typeof spec === 'string') out[alias]=row[spec];
-        else if (spec && typeof spec==='object' && 'column' in spec) out[alias]=row[(spec as any).column];
-        else out[alias]=row;
-      }
-      return out;
-    });
-  }
+
   async execute(): Promise<any[]> {
-    let query:any;
-    if (this.mode==='select') query=this.client.from(this.tableName).select(this.projection);
-    else if (this.mode==='insert') query=this.client.from(this.tableName).insert(this.payload).select('*');
-    else if (this.mode==='update') query=this.apply(this.client.from(this.tableName).update(this.payload).select('*'));
-    else query=this.apply(this.client.from(this.tableName).delete().select('*'));
-    if (this.mode==='select') query=this.apply(query);
-    const {data,error}=await query;
+    let query: any;
+    if (this.mode === 'select') {
+      query = this.apply(this.client.from(this.tableName).select(this.projection));
+    } else if (this.mode === 'insert') {
+      query = this.client.from(this.tableName).insert(this.payload).select('*');
+    } else if (this.mode === 'update') {
+      query = this.apply(this.client.from(this.tableName).update(this.payload)).select('*');
+    } else {
+      query = this.apply(this.client.from(this.tableName).delete()).select('*');
+    }
+    const { data, error } = await query;
     if (error) throw error;
     return this.project(data ?? []);
   }
@@ -114,3 +121,4 @@ db.run=(_sql:any)=>{ throw new Error('SQL Drizzle/SQLite no soportado: migra est
 
 export const supabase: SupabaseClient | null = base;
 export { db };
+
