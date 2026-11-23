@@ -109,8 +109,7 @@ class SupabaseBuilder implements PromiseLike<any[]> {
   }
 }
 
-const db:any = base;
-for (const method of ['select','insert','update','delete','from','run','batch']) delete (db as any)[method];
+const db: any = {};
 db.select=(projection:any)=>new SupabaseBuilder(base).select(projection);
 db.from=(table:any)=>new SupabaseBuilder(base,typeof table==='string'?table:table?.tableName);
 db.insert=(payload:any)=>payload && payload.tableName ? new SupabaseBuilder(base,payload.tableName).insert(null) : new SupabaseBuilder(base).insert(payload);
