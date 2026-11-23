@@ -101,7 +101,7 @@ class SupabaseBuilder implements PromiseLike<any[]> {
       query = this.apply(this.client.from(this.tableName).delete()).select('*');
     }
     const { data, error } = await query;
-    if (error) throw error;
+    if (error) { console.error("[SupabaseBuilder error]", this.tableName, error.message); if (this.mode === "select") return []; throw error; }
     return this.project(data ?? []);
   }
   then<TResult1 = any[], TResult2 = never>(onfulfilled?: ((value:any[])=>TResult1|PromiseLike<TResult1>)|null, onrejected?: ((reason:any)=>TResult2|PromiseLike<TResult2>)|null) {
