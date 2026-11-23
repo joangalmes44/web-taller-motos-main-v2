@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -30,14 +30,16 @@ class SupabaseBuilder implements PromiseLike<any[]> {
   private order: Array<{ field: string; dir: 'asc'|'desc' }> = [];
   private limitValue?: number;
   private joins: any[] = [];
+  private _projection: any;
+
   constructor(private client: SupabaseClient, table?: string) { if (table) this.tableName = table; }
+
   select(projection?: any) {
     this.mode = 'select';
     this.projection = typeof projection === 'object' ? '*' : (typeof projection === 'string' ? projection : '*');
     this._projection = projection;
     return this;
   }
-  private _projection: any;
   from(table: any) { this.tableName = typeof table === 'string' ? table : table?.tableName ?? table?.name; return this; }
   insert(payload: any) { this.mode='insert'; this.payload=payload; return this; }
   values(payload: any) { this.payload=payload; return this; }
@@ -47,7 +49,13 @@ class SupabaseBuilder implements PromiseLike<any[]> {
   where(condition: any) { this.filters.push(condition); return this; }
   innerJoin(_table:any,_condition:any) { this.joins.push({table:_table,condition:_condition}); return this; }
   groupBy(..._fields:any[]) { return this; }
-  orderBy(...fields:any[]) { for (const f of fields) this.order.push({field:f?.field ?? f?.column ?? f, dir:f?.direction==='asc'?'asc':'desc'}); return this; }
+  orderBy(...fields:any[]) {
+    for (const f of fields) {
+      const col = typeof f === 'string' ? f : (f?.field ?? f?.column);
+      if (col) this.order.push({ field: col, dir: f?.direction === 'asc' ? 'asc' : 'desc' });
+    }
+    return this;
+  }
   limit(n:number) { this.limitValue=n; return this; }
   returning(_projection?:any) { return this; }
   onConflictDoNothing() { return this; }
@@ -89,36 +97,8 @@ class SupabaseBuilder implements PromiseLike<any[]> {
     return query;
   }
 
-  async execute(): Promise<any[]> {
-    let query: any;
-    if (this.mode === 'select') {
-      query = this.apply(this.client.from(this.tableName).select(this.projection));
-    } else if (this.mode === 'insert') {
-      query = this.client.from(this.tableName).insert(this.payload).select('*');
-    } else if (this.mode === 'update') {
-      query = this.apply(this.client.from(this.tableName).update(this.payload)).select('*');
-    } else {
-      query = this.apply(this.client.from(this.tableName).delete()).select('*');
-    }
-    const { data, error } = await query;
-    if (error) throw error;
-    return this.project(data ?? []);
-  }
-  then<TResult1 = any[], TResult2 = never>(onfulfilled?: ((value:any[])=>TResult1|PromiseLike<TResult1>)|null, onrejected?: ((reason:any)=>TResult2|PromiseLike<TResult2>)|null) {
-    return this.execute().then(onfulfilled,onrejected);
-  }
-}
-
-const db:any = base;
-for (const method of ['select','insert','update','delete','from','run','batch']) delete (db as any)[method];
-db.select=(projection:any)=>new SupabaseBuilder(base).select(projection);
-db.from=(table:any)=>new SupabaseBuilder(base,typeof table==='string'?table:table?.tableName);
-db.insert=(payload:any)=>payload && payload.tableName ? new SupabaseBuilder(base,payload.tableName).insert(null) : new SupabaseBuilder(base).insert(payload);
-db.update=(payload:any)=>payload && payload.tableName ? new SupabaseBuilder(base,payload.tableName).update({}) : new SupabaseBuilder(base).update(payload);
-db.delete=()=>new SupabaseBuilder(base).delete();
-db.batch=(items:any[])=>Promise.all(items.map((item:any)=>item?.execute ? item.execute() : item));
-db.run=(_sql:any)=>{ throw new Error('SQL Drizzle/SQLite no soportado: migra esta operación a supabase.from(...)'); };
-
-export const supabase: SupabaseClient | null = base;
-export { db };
-
+  private project(rows:any[]) {
+    if (!this._projection || typeof this._projection !== 'object') return rows;
+    return rows.map(row => {
+      const out:any={};
+      for (const [alias, spec] of Object.entries(this._projection)) {
