@@ -1,0 +1,2966 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "676aef53-0f79-46e9-ba96-808b19365216",
+  "prevId": "aa28b03d-1091-44c9-94ec-960804f1d0ce",
+  "tables": {
+    "abonos": {
+      "name": "abonos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "orden_id": {
+          "name": "orden_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "orden_repuesto_id": {
+          "name": "orden_repuesto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "concepto": {
+          "name": "concepto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "requerido_clp": {
+          "name": "requerido_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "pagado_clp": {
+          "name": "pagado_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Pendiente'"
+        },
+        "operation_id": {
+          "name": "operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        },
+        "pagado_en": {
+          "name": "pagado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "abonos_orden": {
+          "name": "abonos_orden",
+          "columns": [
+            "orden_id",
+            "estado"
+          ],
+          "isUnique": false
+        },
+        "abonos_orden_repuesto": {
+          "name": "abonos_orden_repuesto",
+          "columns": [
+            "orden_repuesto_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "abonos_orden_id_ordenes_id_fk": {
+          "name": "abonos_orden_id_ordenes_id_fk",
+          "tableFrom": "abonos",
+          "tableTo": "ordenes",
+          "columnsFrom": [
+            "orden_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "abonos_orden_repuesto_id_orden_repuestos_id_fk": {
+          "name": "abonos_orden_repuesto_id_orden_repuestos_id_fk",
+          "tableFrom": "abonos",
+          "tableTo": "orden_repuestos",
+          "columnsFrom": [
+            "orden_repuesto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "abonos_estado_check": {
+          "name": "abonos_estado_check",
+          "value": "\"abonos\".\"estado\" in ('Pendiente','Pagado','Aplicado')"
+        }
+      }
+    },
+    "adicional_repuestos": {
+      "name": "adicional_repuestos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "adicional_id": {
+          "name": "adicional_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "repuesto_id": {
+          "name": "repuesto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cantidad": {
+          "name": "cantidad",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "precio_clp": {
+          "name": "precio_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "adicional_repuestos_adicional": {
+          "name": "adicional_repuestos_adicional",
+          "columns": [
+            "adicional_id"
+          ],
+          "isUnique": false
+        },
+        "adicional_repuestos_repuesto": {
+          "name": "adicional_repuestos_repuesto",
+          "columns": [
+            "repuesto_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "adicional_repuestos_adicional_id_adicionales_id_fk": {
+          "name": "adicional_repuestos_adicional_id_adicionales_id_fk",
+          "tableFrom": "adicional_repuestos",
+          "tableTo": "adicionales",
+          "columnsFrom": [
+            "adicional_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "adicional_repuestos_repuesto_id_repuestos_id_fk": {
+          "name": "adicional_repuestos_repuesto_id_repuestos_id_fk",
+          "tableFrom": "adicional_repuestos",
+          "tableTo": "repuestos",
+          "columnsFrom": [
+            "repuesto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "adicional_repuestos_cant": {
+          "name": "adicional_repuestos_cant",
+          "value": "\"adicional_repuestos\".\"cantidad\" > 0"
+        }
+      }
+    },
+    "adicionales": {
+      "name": "adicionales",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "orden_id": {
+          "name": "orden_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mecanico_id": {
+          "name": "mecanico_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "descripcion": {
+          "name": "descripcion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mano_obra_clp": {
+          "name": "mano_obra_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "tiempo_extra_min": {
+          "name": "tiempo_extra_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Propuesto'"
+        },
+        "estado_antes": {
+          "name": "estado_antes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'En diagnóstico'"
+        },
+        "propuesto_en": {
+          "name": "propuesto_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "vence_en": {
+          "name": "vence_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "respondido_en": {
+          "name": "respondido_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "respuesta_op": {
+          "name": "respuesta_op",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "operation_id": {
+          "name": "operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "adicionales_operation": {
+          "name": "adicionales_operation",
+          "columns": [
+            "operation_id"
+          ],
+          "isUnique": true
+        },
+        "adicionales_orden": {
+          "name": "adicionales_orden",
+          "columns": [
+            "orden_id",
+            "propuesto_en"
+          ],
+          "isUnique": false
+        },
+        "adicionales_estado_vence": {
+          "name": "adicionales_estado_vence",
+          "columns": [
+            "estado",
+            "vence_en"
+          ],
+          "isUnique": false
+        },
+        "adicionales_mecanico": {
+          "name": "adicionales_mecanico",
+          "columns": [
+            "mecanico_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "adicionales_orden_id_ordenes_id_fk": {
+          "name": "adicionales_orden_id_ordenes_id_fk",
+          "tableFrom": "adicionales",
+          "tableTo": "ordenes",
+          "columnsFrom": [
+            "orden_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "adicionales_mecanico_id_mecanicos_id_fk": {
+          "name": "adicionales_mecanico_id_mecanicos_id_fk",
+          "tableFrom": "adicionales",
+          "tableTo": "mecanicos",
+          "columnsFrom": [
+            "mecanico_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "adicionales_estado_check": {
+          "name": "adicionales_estado_check",
+          "value": "\"adicionales\".\"estado\" in ('Propuesto','Aprobado','Rechazado','Vencido')"
+        },
+        "adicionales_valores_check": {
+          "name": "adicionales_valores_check",
+          "value": "\"adicionales\".\"mano_obra_clp\" >= 0 and \"adicionales\".\"tiempo_extra_min\" >= 0 and \"adicionales\".\"tiempo_extra_min\" % 30 = 0"
+        }
+      }
+    },
+    "compra_items": {
+      "name": "compra_items",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "compra_id": {
+          "name": "compra_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "repuesto_id": {
+          "name": "repuesto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "orden_repuesto_id": {
+          "name": "orden_repuesto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cantidad": {
+          "name": "cantidad",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recibida": {
+          "name": "recibida",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "costo_clp": {
+          "name": "costo_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "compra_items_compra": {
+          "name": "compra_items_compra",
+          "columns": [
+            "compra_id"
+          ],
+          "isUnique": false
+        },
+        "compra_items_repuesto": {
+          "name": "compra_items_repuesto",
+          "columns": [
+            "repuesto_id"
+          ],
+          "isUnique": false
+        },
+        "compra_items_orden_repuesto": {
+          "name": "compra_items_orden_repuesto",
+          "columns": [
+            "orden_repuesto_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "compra_items_compra_id_compras_id_fk": {
+          "name": "compra_items_compra_id_compras_id_fk",
+          "tableFrom": "compra_items",
+          "tableTo": "compras",
+          "columnsFrom": [
+            "compra_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "compra_items_repuesto_id_repuestos_id_fk": {
+          "name": "compra_items_repuesto_id_repuestos_id_fk",
+          "tableFrom": "compra_items",
+          "tableTo": "repuestos",
+          "columnsFrom": [
+            "repuesto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "compra_items_orden_repuesto_id_orden_repuestos_id_fk": {
+          "name": "compra_items_orden_repuesto_id_orden_repuestos_id_fk",
+          "tableFrom": "compra_items",
+          "tableTo": "orden_repuestos",
+          "columnsFrom": [
+            "orden_repuesto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "compra_items_cant": {
+          "name": "compra_items_cant",
+          "value": "\"compra_items\".\"cantidad\" > 0 and \"compra_items\".\"recibida\" >= 0"
+        }
+      }
+    },
+    "compras": {
+      "name": "compras",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "numero": {
+          "name": "numero",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "proveedor_id": {
+          "name": "proveedor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Borrador'"
+        },
+        "orden_id": {
+          "name": "orden_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "nota": {
+          "name": "nota",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        },
+        "enviada_en": {
+          "name": "enviada_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "recibida_en": {
+          "name": "recibida_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "compras_numero": {
+          "name": "compras_numero",
+          "columns": [
+            "numero"
+          ],
+          "isUnique": true
+        },
+        "compras_estado": {
+          "name": "compras_estado",
+          "columns": [
+            "estado",
+            "creado_en"
+          ],
+          "isUnique": false
+        },
+        "compras_proveedor": {
+          "name": "compras_proveedor",
+          "columns": [
+            "proveedor_id"
+          ],
+          "isUnique": false
+        },
+        "compras_orden": {
+          "name": "compras_orden",
+          "columns": [
+            "orden_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "compras_proveedor_id_proveedores_id_fk": {
+          "name": "compras_proveedor_id_proveedores_id_fk",
+          "tableFrom": "compras",
+          "tableTo": "proveedores",
+          "columnsFrom": [
+            "proveedor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "compras_orden_id_ordenes_id_fk": {
+          "name": "compras_orden_id_ordenes_id_fk",
+          "tableFrom": "compras",
+          "tableTo": "ordenes",
+          "columnsFrom": [
+            "orden_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "compras_estado_check": {
+          "name": "compras_estado_check",
+          "value": "\"compras\".\"estado\" in ('Borrador','Enviada','Recibida parcial','Recibida','Anulada')"
+        }
+      }
+    },
+    "mecanicos": {
+      "name": "mecanicos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "comision_pct": {
+          "name": "comision_pct",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "especialidad": {
+          "name": "especialidad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "mecanicos_user": {
+          "name": "mecanicos_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "mecanicos_user_id_users_id_fk": {
+          "name": "mecanicos_user_id_users_id_fk",
+          "tableFrom": "mecanicos",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "mecanicos_pct_check": {
+          "name": "mecanicos_pct_check",
+          "value": "\"mecanicos\".\"comision_pct\" in (35,40)"
+        }
+      }
+    },
+    "moto_km": {
+      "name": "moto_km",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "moto_id": {
+          "name": "moto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "km": {
+          "name": "km",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fuente": {
+          "name": "fuente",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'cliente'"
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        }
+      },
+      "indexes": {
+        "moto_km_moto": {
+          "name": "moto_km_moto",
+          "columns": [
+            "moto_id",
+            "creado_en"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "moto_km_moto_id_motos_id_fk": {
+          "name": "moto_km_moto_id_motos_id_fk",
+          "tableFrom": "moto_km",
+          "tableTo": "motos",
+          "columnsFrom": [
+            "moto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "motos": {
+      "name": "motos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patente": {
+          "name": "patente",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "marca": {
+          "name": "marca",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "modelo": {
+          "name": "modelo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cc": {
+          "name": "cc",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "km_actual": {
+          "name": "km_actual",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        }
+      },
+      "indexes": {
+        "motos_patente": {
+          "name": "motos_patente",
+          "columns": [
+            "patente"
+          ],
+          "isUnique": true
+        },
+        "motos_user": {
+          "name": "motos_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "motos_user_id_users_id_fk": {
+          "name": "motos_user_id_users_id_fk",
+          "tableFrom": "motos",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "motos_cc_check": {
+          "name": "motos_cc_check",
+          "value": "\"motos\".\"cc\" between 125 and 1300"
+        },
+        "motos_km_check": {
+          "name": "motos_km_check",
+          "value": "\"motos\".\"km_actual\" >= 0"
+        }
+      }
+    },
+    "movimientos_stock": {
+      "name": "movimientos_stock",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "repuesto_id": {
+          "name": "repuesto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cantidad": {
+          "name": "cantidad",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nota": {
+          "name": "nota",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "orden_id": {
+          "name": "orden_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "compra_id": {
+          "name": "compra_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "operation_id": {
+          "name": "operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        }
+      },
+      "indexes": {
+        "movimientos_repuesto": {
+          "name": "movimientos_repuesto",
+          "columns": [
+            "repuesto_id"
+          ],
+          "isUnique": false
+        },
+        "movimientos_orden": {
+          "name": "movimientos_orden",
+          "columns": [
+            "orden_id"
+          ],
+          "isUnique": false
+        },
+        "movimientos_compra": {
+          "name": "movimientos_compra",
+          "columns": [
+            "compra_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "movimientos_stock_repuesto_id_repuestos_id_fk": {
+          "name": "movimientos_stock_repuesto_id_repuestos_id_fk",
+          "tableFrom": "movimientos_stock",
+          "tableTo": "repuestos",
+          "columnsFrom": [
+            "repuesto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "movimientos_stock_orden_id_ordenes_id_fk": {
+          "name": "movimientos_stock_orden_id_ordenes_id_fk",
+          "tableFrom": "movimientos_stock",
+          "tableTo": "ordenes",
+          "columnsFrom": [
+            "orden_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "movimientos_stock_compra_id_compras_id_fk": {
+          "name": "movimientos_stock_compra_id_compras_id_fk",
+          "tableFrom": "movimientos_stock",
+          "tableTo": "compras",
+          "columnsFrom": [
+            "compra_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "movimientos_tipo_check": {
+          "name": "movimientos_tipo_check",
+          "value": "\"movimientos_stock\".\"tipo\" in ('ingreso','salida','ajuste','reserva','liberacion')"
+        }
+      }
+    },
+    "orden_historial": {
+      "name": "orden_historial",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "orden_id": {
+          "name": "orden_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nota": {
+          "name": "nota",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "autor": {
+          "name": "autor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        }
+      },
+      "indexes": {
+        "orden_historial_orden": {
+          "name": "orden_historial_orden",
+          "columns": [
+            "orden_id",
+            "creado_en"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "orden_historial_orden_id_ordenes_id_fk": {
+          "name": "orden_historial_orden_id_ordenes_id_fk",
+          "tableFrom": "orden_historial",
+          "tableTo": "ordenes",
+          "columnsFrom": [
+            "orden_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "orden_repuestos": {
+      "name": "orden_repuestos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "orden_id": {
+          "name": "orden_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "repuesto_id": {
+          "name": "repuesto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "adicional_id": {
+          "name": "adicional_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cantidad": {
+          "name": "cantidad",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "precio_clp": {
+          "name": "precio_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        }
+      },
+      "indexes": {
+        "orden_repuestos_orden": {
+          "name": "orden_repuestos_orden",
+          "columns": [
+            "orden_id",
+            "estado"
+          ],
+          "isUnique": false
+        },
+        "orden_repuestos_repuesto": {
+          "name": "orden_repuestos_repuesto",
+          "columns": [
+            "repuesto_id"
+          ],
+          "isUnique": false
+        },
+        "orden_repuestos_adicional": {
+          "name": "orden_repuestos_adicional",
+          "columns": [
+            "adicional_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "orden_repuestos_orden_id_ordenes_id_fk": {
+          "name": "orden_repuestos_orden_id_ordenes_id_fk",
+          "tableFrom": "orden_repuestos",
+          "tableTo": "ordenes",
+          "columnsFrom": [
+            "orden_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "orden_repuestos_repuesto_id_repuestos_id_fk": {
+          "name": "orden_repuestos_repuesto_id_repuestos_id_fk",
+          "tableFrom": "orden_repuestos",
+          "tableTo": "repuestos",
+          "columnsFrom": [
+            "repuesto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "orden_repuestos_adicional_id_adicionales_id_fk": {
+          "name": "orden_repuestos_adicional_id_adicionales_id_fk",
+          "tableFrom": "orden_repuestos",
+          "tableTo": "adicionales",
+          "columnsFrom": [
+            "adicional_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "orden_repuestos_estado_check": {
+          "name": "orden_repuestos_estado_check",
+          "value": "\"orden_repuestos\".\"estado\" in ('Reservado','Esperando abono','Pedido','Usado','Liberado')"
+        },
+        "orden_repuestos_cant": {
+          "name": "orden_repuestos_cant",
+          "value": "\"orden_repuestos\".\"cantidad\" > 0"
+        }
+      }
+    },
+    "ordenes": {
+      "name": "ordenes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "operation_id": {
+          "name": "operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "numero": {
+          "name": "numero",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reserva_id": {
+          "name": "reserva_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "moto_id": {
+          "name": "moto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "servicio_id": {
+          "name": "servicio_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "puesto_id": {
+          "name": "puesto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mecanico_id": {
+          "name": "mecanico_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "origen": {
+          "name": "origen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'reserva'"
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Recibida'"
+        },
+        "km_ingreso": {
+          "name": "km_ingreso",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "combustible": {
+          "name": "combustible",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'1/2'"
+        },
+        "danos": {
+          "name": "danos",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "notas": {
+          "name": "notas",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "mano_obra_clp": {
+          "name": "mano_obra_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "extra_min": {
+          "name": "extra_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "inicio_plan": {
+          "name": "inicio_plan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fin_plan": {
+          "name": "fin_plan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entrega_estimada": {
+          "name": "entrega_estimada",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entrega_movida": {
+          "name": "entrega_movida",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "lista_en": {
+          "name": "lista_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "entregada_en": {
+          "name": "entregada_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "estado_antes_repuesto": {
+          "name": "estado_antes_repuesto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        },
+        "actualizado_en": {
+          "name": "actualizado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        }
+      },
+      "indexes": {
+        "ordenes_operation": {
+          "name": "ordenes_operation",
+          "columns": [
+            "operation_id"
+          ],
+          "isUnique": true
+        },
+        "ordenes_numero": {
+          "name": "ordenes_numero",
+          "columns": [
+            "numero"
+          ],
+          "isUnique": true
+        },
+        "ordenes_reserva": {
+          "name": "ordenes_reserva",
+          "columns": [
+            "reserva_id"
+          ],
+          "isUnique": true
+        },
+        "ordenes_user": {
+          "name": "ordenes_user",
+          "columns": [
+            "user_id",
+            "creado_en"
+          ],
+          "isUnique": false
+        },
+        "ordenes_estado": {
+          "name": "ordenes_estado",
+          "columns": [
+            "estado",
+            "creado_en"
+          ],
+          "isUnique": false
+        },
+        "ordenes_mecanico": {
+          "name": "ordenes_mecanico",
+          "columns": [
+            "mecanico_id",
+            "inicio_plan"
+          ],
+          "isUnique": false
+        },
+        "ordenes_puesto": {
+          "name": "ordenes_puesto",
+          "columns": [
+            "puesto_id",
+            "creado_en"
+          ],
+          "isUnique": false
+        },
+        "ordenes_moto": {
+          "name": "ordenes_moto",
+          "columns": [
+            "moto_id"
+          ],
+          "isUnique": false
+        },
+        "ordenes_servicio": {
+          "name": "ordenes_servicio",
+          "columns": [
+            "servicio_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "ordenes_reserva_id_reservas_id_fk": {
+          "name": "ordenes_reserva_id_reservas_id_fk",
+          "tableFrom": "ordenes",
+          "tableTo": "reservas",
+          "columnsFrom": [
+            "reserva_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "ordenes_user_id_users_id_fk": {
+          "name": "ordenes_user_id_users_id_fk",
+          "tableFrom": "ordenes",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "ordenes_moto_id_motos_id_fk": {
+          "name": "ordenes_moto_id_motos_id_fk",
+          "tableFrom": "ordenes",
+          "tableTo": "motos",
+          "columnsFrom": [
+            "moto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "ordenes_servicio_id_servicios_id_fk": {
+          "name": "ordenes_servicio_id_servicios_id_fk",
+          "tableFrom": "ordenes",
+          "tableTo": "servicios",
+          "columnsFrom": [
+            "servicio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "ordenes_puesto_id_puestos_id_fk": {
+          "name": "ordenes_puesto_id_puestos_id_fk",
+          "tableFrom": "ordenes",
+          "tableTo": "puestos",
+          "columnsFrom": [
+            "puesto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "ordenes_mecanico_id_mecanicos_id_fk": {
+          "name": "ordenes_mecanico_id_mecanicos_id_fk",
+          "tableFrom": "ordenes",
+          "tableTo": "mecanicos",
+          "columnsFrom": [
+            "mecanico_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ordenes_estado_check": {
+          "name": "ordenes_estado_check",
+          "value": "\"ordenes\".\"estado\" in ('Recibida','En diagnóstico','Esperando aprobación','Esperando repuesto','En reparación','Prueba de ruta','Lista para retirar','Entregada','Garantía','Anulada')"
+        },
+        "ordenes_origen_check": {
+          "name": "ordenes_origen_check",
+          "value": "\"ordenes\".\"origen\" in ('reserva','sin_hora')"
+        }
+      }
+    },
+    "perfiles": {
+      "name": "perfiles",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rol": {
+          "name": "rol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'cliente'"
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "telefono": {
+          "name": "telefono",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "perfiles_rol": {
+          "name": "perfiles_rol",
+          "columns": [
+            "rol"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "perfiles_user_id_users_id_fk": {
+          "name": "perfiles_user_id_users_id_fk",
+          "tableFrom": "perfiles",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "perfiles_rol_check": {
+          "name": "perfiles_rol_check",
+          "value": "\"perfiles\".\"rol\" in ('cliente','mecanico','recepcion','administracion')"
+        }
+      }
+    },
+    "proveedores": {
+      "name": "proveedores",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rubro": {
+          "name": "rubro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "contacto": {
+          "name": "contacto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "telefono": {
+          "name": "telefono",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "plazo_dias": {
+          "name": "plazo_dias",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "puestos": {
+      "name": "puestos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "numero": {
+          "name": "numero",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "descripcion": {
+          "name": "descripcion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "equipado": {
+          "name": "equipado",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "recepciones_compra": {
+      "name": "recepciones_compra",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "compra_id": {
+          "name": "compra_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "operation_id": {
+          "name": "operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "resumen": {
+          "name": "resumen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        }
+      },
+      "indexes": {
+        "recepciones_operation": {
+          "name": "recepciones_operation",
+          "columns": [
+            "operation_id"
+          ],
+          "isUnique": true
+        },
+        "recepciones_compra": {
+          "name": "recepciones_compra",
+          "columns": [
+            "compra_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "recepciones_compra_compra_id_compras_id_fk": {
+          "name": "recepciones_compra_compra_id_compras_id_fk",
+          "tableFrom": "recepciones_compra",
+          "tableTo": "compras",
+          "columnsFrom": [
+            "compra_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "recibos": {
+      "name": "recibos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "numero": {
+          "name": "numero",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "orden_id": {
+          "name": "orden_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "operation_id": {
+          "name": "operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mano_obra_clp": {
+          "name": "mano_obra_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "repuestos_clp": {
+          "name": "repuestos_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "bodegaje_dias": {
+          "name": "bodegaje_dias",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "bodegaje_clp": {
+          "name": "bodegaje_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "abonos_clp": {
+          "name": "abonos_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "total_clp": {
+          "name": "total_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cobrado_clp": {
+          "name": "cobrado_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "medio_pago": {
+          "name": "medio_pago",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cobrado_por": {
+          "name": "cobrado_por",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        }
+      },
+      "indexes": {
+        "recibos_numero": {
+          "name": "recibos_numero",
+          "columns": [
+            "numero"
+          ],
+          "isUnique": true
+        },
+        "recibos_orden": {
+          "name": "recibos_orden",
+          "columns": [
+            "orden_id"
+          ],
+          "isUnique": true
+        },
+        "recibos_operation": {
+          "name": "recibos_operation",
+          "columns": [
+            "operation_id"
+          ],
+          "isUnique": true
+        },
+        "recibos_user": {
+          "name": "recibos_user",
+          "columns": [
+            "user_id",
+            "creado_en"
+          ],
+          "isUnique": false
+        },
+        "recibos_creado": {
+          "name": "recibos_creado",
+          "columns": [
+            "creado_en"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "recibos_orden_id_ordenes_id_fk": {
+          "name": "recibos_orden_id_ordenes_id_fk",
+          "tableFrom": "recibos",
+          "tableTo": "ordenes",
+          "columnsFrom": [
+            "orden_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "recibos_user_id_users_id_fk": {
+          "name": "recibos_user_id_users_id_fk",
+          "tableFrom": "recibos",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "repuestos": {
+      "name": "repuestos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sku": {
+          "name": "sku",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "compatibilidad": {
+          "name": "compatibilidad",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "costo_clp": {
+          "name": "costo_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "precio_clp": {
+          "name": "precio_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stock_minimo": {
+          "name": "stock_minimo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "especial": {
+          "name": "especial",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "proveedor_id": {
+          "name": "proveedor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "repuestos_sku": {
+          "name": "repuestos_sku",
+          "columns": [
+            "sku"
+          ],
+          "isUnique": true
+        },
+        "repuestos_proveedor": {
+          "name": "repuestos_proveedor",
+          "columns": [
+            "proveedor_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "repuestos_proveedor_id_proveedores_id_fk": {
+          "name": "repuestos_proveedor_id_proveedores_id_fk",
+          "tableFrom": "repuestos",
+          "tableTo": "proveedores",
+          "columnsFrom": [
+            "proveedor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "repuestos_precio_check": {
+          "name": "repuestos_precio_check",
+          "value": "\"repuestos\".\"costo_clp\" >= 0 and \"repuestos\".\"precio_clp\" >= 0"
+        }
+      }
+    },
+    "reservas": {
+      "name": "reservas",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "operation_id": {
+          "name": "operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "moto_id": {
+          "name": "moto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "servicio_id": {
+          "name": "servicio_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "puesto_id": {
+          "name": "puesto_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "inicio": {
+          "name": "inicio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fin": {
+          "name": "fin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "duracion_min": {
+          "name": "duracion_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "precio_clp": {
+          "name": "precio_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Confirmada'"
+        },
+        "abono_requerido_clp": {
+          "name": "abono_requerido_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "abono_pagado_clp": {
+          "name": "abono_pagado_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "reprogramada_de": {
+          "name": "reprogramada_de",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))"
+        }
+      },
+      "indexes": {
+        "reservas_operation": {
+          "name": "reservas_operation",
+          "columns": [
+            "operation_id"
+          ],
+          "isUnique": true
+        },
+        "reservas_puesto_inicio": {
+          "name": "reservas_puesto_inicio",
+          "columns": [
+            "puesto_id",
+            "inicio"
+          ],
+          "isUnique": false
+        },
+        "reservas_inicio": {
+          "name": "reservas_inicio",
+          "columns": [
+            "inicio"
+          ],
+          "isUnique": false
+        },
+        "reservas_user_inicio": {
+          "name": "reservas_user_inicio",
+          "columns": [
+            "user_id",
+            "inicio"
+          ],
+          "isUnique": false
+        },
+        "reservas_user_estado": {
+          "name": "reservas_user_estado",
+          "columns": [
+            "user_id",
+            "estado",
+            "inicio"
+          ],
+          "isUnique": false
+        },
+        "reservas_moto": {
+          "name": "reservas_moto",
+          "columns": [
+            "moto_id"
+          ],
+          "isUnique": false
+        },
+        "reservas_servicio": {
+          "name": "reservas_servicio",
+          "columns": [
+            "servicio_id"
+          ],
+          "isUnique": false
+        },
+        "reservas_reprog_de": {
+          "name": "reservas_reprog_de",
+          "columns": [
+            "reprogramada_de"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "reservas_user_id_users_id_fk": {
+          "name": "reservas_user_id_users_id_fk",
+          "tableFrom": "reservas",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "reservas_moto_id_motos_id_fk": {
+          "name": "reservas_moto_id_motos_id_fk",
+          "tableFrom": "reservas",
+          "tableTo": "motos",
+          "columnsFrom": [
+            "moto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reservas_servicio_id_servicios_id_fk": {
+          "name": "reservas_servicio_id_servicios_id_fk",
+          "tableFrom": "reservas",
+          "tableTo": "servicios",
+          "columnsFrom": [
+            "servicio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reservas_puesto_id_puestos_id_fk": {
+          "name": "reservas_puesto_id_puestos_id_fk",
+          "tableFrom": "reservas",
+          "tableTo": "puestos",
+          "columnsFrom": [
+            "puesto_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "reservas_estado_check": {
+          "name": "reservas_estado_check",
+          "value": "\"reservas\".\"estado\" in ('Pendiente','Confirmada','En taller','No asistió','Cancelada','Reprogramada')"
+        },
+        "reservas_fin_check": {
+          "name": "reservas_fin_check",
+          "value": "\"reservas\".\"fin\" > \"reservas\".\"inicio\""
+        }
+      }
+    },
+    "servicio_tarifas": {
+      "name": "servicio_tarifas",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "servicio_id": {
+          "name": "servicio_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rango": {
+          "name": "rango",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "duracion_min": {
+          "name": "duracion_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "precio_clp": {
+          "name": "precio_clp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "servicio_tarifas_servicio_rango": {
+          "name": "servicio_tarifas_servicio_rango",
+          "columns": [
+            "servicio_id",
+            "rango"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "servicio_tarifas_servicio_id_servicios_id_fk": {
+          "name": "servicio_tarifas_servicio_id_servicios_id_fk",
+          "tableFrom": "servicio_tarifas",
+          "tableTo": "servicios",
+          "columnsFrom": [
+            "servicio_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "tarifas_rango_check": {
+          "name": "tarifas_rango_check",
+          "value": "\"servicio_tarifas\".\"rango\" in ('A','B','C')"
+        },
+        "tarifas_duracion_check": {
+          "name": "tarifas_duracion_check",
+          "value": "\"servicio_tarifas\".\"duracion_min\" > 0 and \"servicio_tarifas\".\"duracion_min\" % 30 = 0"
+        }
+      }
+    },
+    "servicios": {
+      "name": "servicios",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "descripcion": {
+          "name": "descripcion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "solo_puesto_equipado": {
+          "name": "solo_puesto_equipado",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "nota": {
+          "name": "nota",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "orden": {
+          "name": "orden",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "accounts": {
+      "name": "accounts",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "provider_id": {
+          "name": "provider_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "access_token_expires_at": {
+          "name": "access_token_expires_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "refresh_token_expires_at": {
+          "name": "refresh_token_expires_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "accounts_user_id": {
+          "name": "accounts_user_id",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "accounts_user_id_users_id_fk": {
+          "name": "accounts_user_id_users_id_fk",
+          "tableFrom": "accounts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "rate_limits": {
+      "name": "rate_limits",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "count": {
+          "name": "count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "last_request": {
+          "name": "last_request",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "rate_limits_key_unique": {
+          "name": "rate_limits_key_unique",
+          "columns": [
+            "key"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "sessions": {
+      "name": "sessions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "sessions_token_unique": {
+          "name": "sessions_token_unique",
+          "columns": [
+            "token"
+          ],
+          "isUnique": true
+        },
+        "sessions_user_id": {
+          "name": "sessions_user_id",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "columns": [
+            "lower(\"email\")"
+          ],
+          "isUnique": true
+        },
+        "users_email_key": {
+          "name": "users_email_key",
+          "columns": [
+            "lower(replace(substr(\"email\", 1, instr(\"email\", '@') - 1), '.', '') || substr(\"email\", instr(\"email\", '@')))"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "verifications": {
+      "name": "verifications",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "verifications_identifier": {
+          "name": "verifications_identifier",
+          "columns": [
+            "identifier"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {
+      "users_email_unique": {
+        "columns": {
+          "lower(\"email\")": {
+            "isExpression": true
+          }
+        }
+      },
+      "users_email_key": {
+        "columns": {
+          "lower(replace(substr(\"email\", 1, instr(\"email\", '@') - 1), '.', '') || substr(\"email\", instr(\"email\", '@')))": {
+            "isExpression": true
+          }
+        }
+      }
+    }
+  }
+}

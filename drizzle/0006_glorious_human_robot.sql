@@ -1,0 +1,1 @@
+CREATE INDEX `reservas_servicio` ON `reservas` (`servicio_id`);

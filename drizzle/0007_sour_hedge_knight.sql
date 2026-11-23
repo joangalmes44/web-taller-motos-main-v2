@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `reservas_reprog_de` ON `reservas` (`reprogramada_de`);
