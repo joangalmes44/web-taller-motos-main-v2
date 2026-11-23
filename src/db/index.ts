@@ -89,7 +89,7 @@ class SupabaseBuilder implements PromiseLike<any[]> {
     return query;
   }
 
-  async execute(): Promise<any[]> {
+  private project(rows: any[]) { if (!this._projection || typeof this._projection !== "object") return rows; return rows.map(row => { const out: any = {}; for (const [alias, spec] of Object.entries(this._projection)) { if (typeof spec === "string") out[alias] = row[spec]; else if (spec && typeof spec === "object" && "column" in spec) out[alias] = row[(spec as any).column]; else out[alias] = row; } return out; }); } async execute(): Promise<any[]> {
     let query: any;
     if (this.mode === 'select') {
       query = this.apply(this.client.from(this.tableName).select(this.projection));
