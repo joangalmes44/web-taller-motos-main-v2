@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+﻿import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -79,7 +79,7 @@ class SupabaseBuilder implements PromiseLike<any[]> {
     if (this.mode === 'select') {
       for (const o of this.order) {
         if (o?.field && typeof query.order === 'function') {
-          query = query.order(o.field, { ascending: o.dir === 'asc' });
+          query = (typeof query.order === "function" ? query.order(o.field, { ascending: o.dir === "asc" }) : query);
         }
       }
       if (this.limitValue && typeof query.limit === 'function') {
@@ -117,7 +117,7 @@ db.insert=(payload:any)=>payload && payload.tableName ? new SupabaseBuilder(base
 db.update=(payload:any)=>payload && payload.tableName ? new SupabaseBuilder(base,payload.tableName).update({}) : new SupabaseBuilder(base).update(payload);
 db.delete=()=>new SupabaseBuilder(base).delete();
 db.batch=(items:any[])=>Promise.all(items.map((item:any)=>item?.execute ? item.execute() : item));
-db.run=(_sql:any)=>{ throw new Error('SQL Drizzle/SQLite no soportado: migra esta operación a supabase.from(...)'); };
+db.run=(_sql:any)=>{ throw new Error('SQL Drizzle/SQLite no soportado: migra esta operaciÃ³n a supabase.from(...)'); };
 
 export const supabase: SupabaseClient | null = base;
 export { db };
