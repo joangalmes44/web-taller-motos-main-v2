@@ -7,6 +7,7 @@ import { servicioTarifas, servicios } from '@/db/schema';
 import { clp, horas, RANGO_TEXTO, type Rango } from '@/lib/catalogo';
 import { and, desc, eq } from '@/db/compat';
 
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Servicios y precios' };
 
 export default async function ServiciosPage() {
