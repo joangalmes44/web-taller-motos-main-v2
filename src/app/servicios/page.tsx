@@ -9,17 +9,45 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Servicios y precios' };
 
 export default async function ServiciosPage() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+
+  if (!url || !key) {
+    return (
+      <AppPage title="Servicios y precios" description="Error de configuración">
+        <pre className="border-2 border-red-600 bg-red-50 p-4 text-sm text-red-900">
+          Faltan variables de entorno en Vercel: URL={String(Boolean(url))}, KEY={String(Boolean(key))}
+        </pre>
+      </AppPage>
+    );
+  }
+
   const supabase = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 
-  const [{ data: svsData }, { data: tarifasData }] = await Promise.all([
+  const [resSvs, resTarifas] = await Promise.all([
     supabase.from('servicios').select('*').order('orden', { ascending: true }),
     supabase.from('servicio_tarifas').select('*'),
   ]);
 
-  const svs = svsData ?? [];
-  const tarifas = tarifasData ?? [];
+  const svs = resSvs.data ?? [];
+  const tarifas = resTarifas.data ?? [];
+
+  if (svs.length === 0) {
+    return (
+      <AppPage title="Servicios y precios" description="Diagnóstico de conexión">
+        <pre className="border-2 border-amber-600 bg-amber-50 p-4 text-xs text-zinc-900 whitespace-pre-wrap">
+{JSON.stringify({
+  supabaseUrl: url,
+  keyPrefix: key.slice(0, 18) + '...',
+  errorServicios: resSvs.error,
+  errorTarifas: resTarifas.error,
+  filasServicios: svs.length,
+  filasTarifas: tarifas.length,
+}, null, 2)}
+        </pre>
+      </AppPage>
+    );
+  }
 
   return (
     <AppPage
