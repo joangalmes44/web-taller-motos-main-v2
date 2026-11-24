@@ -19,6 +19,15 @@ export function getSupabaseAdmin(): SupabaseClient {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
+async function getAuthHeaders(): Promise<Record<string, string> | undefined> {
+  try {
+    const { cookies } = await import('next/headers');
+    const c = await cookies();
+    const token = c.get('sb-auth-token')?.value;
+    if (token) return { Authorization: `Bearer ${decodeURIComponent(token)}` };
+  } catch {}
+  return undefined;
+}
 const base = ensureClient();
 
 class SupabaseBuilder implements PromiseLike<any[]> {
@@ -90,15 +99,17 @@ class SupabaseBuilder implements PromiseLike<any[]> {
   }
 
   private project(rows: any[]) { if (!this._projection || typeof this._projection !== "object") return rows; return rows.map(row => { const out: any = {}; for (const [alias, spec] of Object.entries(this._projection)) { if (typeof spec === "string") out[alias] = row[spec]; else if (spec && typeof spec === "object" && "column" in spec) out[alias] = row[(spec as any).column]; else out[alias] = row; } return out; }); } async execute(): Promise<any[]> {
+    const authHeaders = await getAuthHeaders();
+    const activeClient = authHeaders ? ensureClient(authHeaders.Authorization.replace('Bearer ', '')) : this.client;
     let query: any;
     if (this.mode === 'select') {
-      query = this.apply(this.client.from(this.tableName).select(this.projection));
+      query = this.apply(activeClient.from(this.tableName).select(this.projection));
     } else if (this.mode === 'insert') {
-      query = this.client.from(this.tableName).insert(this.payload).select('*');
+      query = activeClient.from(this.tableName).insert(this.payload).select('*');
     } else if (this.mode === 'update') {
-      query = this.apply(this.client.from(this.tableName).update(this.payload)).select('*');
+      query = this.apply(activeClient.from(this.tableName).update(this.payload)).select('*');
     } else {
-      query = this.apply(this.client.from(this.tableName).delete()).select('*');
+      query = this.apply(activeClient.from(this.tableName).delete()).select('*');
     }
     const { data, error } = await query;
     if (error) { console.error("[SupabaseBuilder error]", this.tableName, error.message); if (this.mode === "select") return []; throw error; }
