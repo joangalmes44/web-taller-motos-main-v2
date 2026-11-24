@@ -98,9 +98,14 @@ class SupabaseBuilder implements PromiseLike<any[]> {
     return query;
   }
 
-  private project(rows: any[]) { if (!this._projection || typeof this._projection !== "object") return rows; return rows.map(row => { const out: any = {}; for (const [alias, spec] of Object.entries(this._projection)) { if (typeof spec === "string") out[alias] = row[spec]; else if (spec && typeof spec === "object" && "column" in spec) out[alias] = row[(spec as any).column]; else out[alias] = row; } return out; }); } async execute(): Promise<any[]> {
-    const authHeaders = await getAuthHeaders();
-    const activeClient = authHeaders ? ensureClient(authHeaders.Authorization.replace('Bearer ', '')) : this.client;
+  async execute(): Promise<any[]> {
+    let activeClient = this.client;
+    try {
+      const { cookies } = await import('next/headers');
+      const c = await cookies();
+      const token = c.get('sb-auth-token')?.value;
+      if (token) activeClient = ensureClient(decodeURIComponent(token));
+    } catch {}
     let query: any;
     if (this.mode === 'select') {
       query = this.apply(activeClient.from(this.tableName).select(this.projection));
@@ -127,8 +132,7 @@ db.insert=(payload:any)=>payload && payload.tableName ? new SupabaseBuilder(base
 db.update=(payload:any)=>payload && payload.tableName ? new SupabaseBuilder(base,payload.tableName).update({}) : new SupabaseBuilder(base).update(payload);
 db.delete=()=>new SupabaseBuilder(base).delete();
 db.batch=(items:any[])=>Promise.all(items.map((item:any)=>item?.execute ? item.execute() : item));
-db.run=(_sql:any)=>{ throw new Error('SQL Drizzle/SQLite no soportado: migra esta operaciÃ³n a supabase.from(...)'); };
+db.run=(_sql:any)=>{ throw new Error('SQL Drizzle/SQLite no soportado'); };
 
 export const supabase: SupabaseClient | null = base;
 export { db };
-
