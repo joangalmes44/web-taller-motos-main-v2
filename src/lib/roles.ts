@@ -1,9 +1,9 @@
-﻿import { redirect } from 'next/navigation';
+﻿import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
-import { supabase } from '@/db';
 import { type Rol } from '@/db/schema';
 import { isAdmin } from '@/lib/admin';
-import { currentSession } from '@/lib/auth';
+import { currentSession, getAuth } from '@/lib/auth';
 
 export type { Rol };
 
@@ -16,7 +16,6 @@ export const ROL_NOMBRE: Record<Rol, string> = {
 
 type Link = { href: string; label: string };
 
-/** Navegación de cada rol. Las pantallas de los pasos siguientes se suman acá. */
 export const NAV_POR_ROL: Record<Rol, Link[]> = {
   cliente: [
     { href: '/panel', label: 'Mi panel' },
@@ -52,18 +51,34 @@ export const NAV_POR_ROL: Record<Rol, Link[]> = {
   ],
 };
 
-/** Rol de la sesión: administración si es una dirección de admin; si no, la fila de `perfiles`; sin fila, cliente. */
 export async function currentRol() {
   const session = await currentSession();
   if (!session) return { session: null, rol: 'cliente' as Rol };
   const user = session.user;
   if (isAdmin(user)) return { session, rol: 'administracion' as Rol };
-  const { data: perfil } = await supabase!.from('perfiles').select('rol').eq('user_id', user.id).maybeSingle();
+
+  const c = await cookies();
+  const token = c.get('sb-auth-token')?.value;
+  const client = getAuth(
+    new Request('http://localhost', {
+      headers: token ? { authorization: `Bearer ${decodeURIComponent(token)}` } : undefined,
+    })
+  );
+
+  const { data: perfil, error } = await client
+    .from('perfiles')
+    .select('rol')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[currentRol perfiles error]', error.message);
+  }
+
   const rol: Rol = (perfil?.rol as Rol) || 'cliente';
   return { session, rol };
 }
 
-/** Protege una página: sin sesión va a /login; con un rol que no corresponde, a /panel. */
 export async function requireRol(allowed?: Rol[]) {
   const { session, rol } = await currentRol();
   if (!session) redirect('/login');
