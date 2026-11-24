@@ -1,10 +1,9 @@
-import { headers } from 'next/headers';
+﻿import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
 function config() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) throw new Error('Faltan las variables públicas de Supabase');
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://sfflmlpkoutpiscoopnx.supabase.co';
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_JSf9dHPMpC8L3mlxtYkT9A_jclqOsrm';
   return { url, key };
 }
 
@@ -25,14 +24,14 @@ export function googleClient() {
 export async function currentSession() {
   const h = await headers();
   const authHeader = h.get('authorization');
-  const bearer = authHeader?.replace(/^Bearer\s+/i, '') ?? null;
+  let bearer = authHeader?.replace(/^Bearer\s+/i, '') ?? null;
   if (!bearer) {
     const cookie = h.get('cookie') ?? '';
     const match = cookie.match(/(?:sb-[^=]+-auth-token|sb-auth-token)=([^;]+)/);
-    if (!match) return null;
+    if (match?.[1]) bearer = decodeURIComponent(match[1]);
   }
   if (!bearer) return null;
-  const supabase = getAuth(new Request('http://localhost', { headers: h }));
+  const supabase = getAuth(new Request('http://localhost', { headers: { authorization: `Bearer ${bearer}` } }));
   const { data, error } = await supabase.auth.getUser(bearer);
   return error ? null : { user: data.user };
 }

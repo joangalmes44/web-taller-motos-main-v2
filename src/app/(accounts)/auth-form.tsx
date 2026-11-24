@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,7 +15,7 @@ import { site } from '@/lib/site';
 // The account pages' pieces (sign-in, sign-up, codes, reset, account), styled with the project's tokens (bg-brand, the
 // fonts in @theme), so they match whatever look the project picks. Words: ./text.ts.
 
-/** La pantalla de las páginas sin sesión: panel de cartel a la izquierda (en escritorio), tarjeta con el formulario a la derecha. */
+/** La pantalla de las pÃ¡ginas sin sesiÃ³n: panel de cartel a la izquierda (en escritorio), tarjeta con el formulario a la derecha. */
 export function AuthShell(props: {
   title: string;
   lead: ReactNode;
@@ -29,7 +29,7 @@ export function AuthShell(props: {
         <div>
           <p className="inline-flex items-center gap-3 font-display text-sm uppercase tracking-[0.25em] text-accent">
             <span aria-hidden className="hazard h-3 w-10 border border-brand" />
-            Taller de motos · 125 a 1300 cc
+            Taller de motos Â· 125 a 1300 cc
           </p>
           <p className="mt-6 font-display text-7xl font-bold uppercase leading-[0.92] tracking-tight">
             Tu moto,
@@ -39,7 +39,7 @@ export function AuthShell(props: {
             <span className="text-accent">tu OK.</span>
           </p>
           <ul className="mt-8 grid gap-3 text-lg text-zinc-300">
-            {['Reservá tu hora según tu cilindrada', 'Seguí el estado de tu orden desde el celular', 'Aprobá los adicionales sin llamar a nadie'].map((t) => (
+            {['ReservÃ¡ tu hora segÃºn tu cilindrada', 'SeguÃ­ el estado de tu orden desde el celular', 'AprobÃ¡ los adicionales sin llamar a nadie'].map((t) => (
               <li className="flex items-start gap-3" key={t}>
                 <span aria-hidden className="mt-2.5 size-2.5 shrink-0 rotate-45 bg-accent" />
                 {t}
@@ -148,7 +148,7 @@ export function NewTabNotice() {
   );
 }
 
-// Supabase devuelve los errores de inicio social a esta ruta mediante el parámetro `error`.
+// Supabase devuelve los errores de inicio social a esta ruta mediante el parÃ¡metro `error`.
 const GOOGLE_ERRORS: Record<string, string> = { account_not_linked: text.googleNotLinked };
 
 /** "Continue with Google" (src/lib/auth.ts `googleClient`, shown only when the project has the Google secrets). */
@@ -246,7 +246,7 @@ export function AuthForm({
       setVerifying(false);
     }
     // `site.verifyEmail`: a new account (no session yet) or an unconfirmed one confirms its code first
-    if ((!error && !data?.token) || error?.code === 'EMAIL_NOT_VERIFIED') {
+    if ((!error && !(data as any)?.token && !(data as any)?.session) || error?.code === 'EMAIL_NOT_VERIFIED') {
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
       return;
     }

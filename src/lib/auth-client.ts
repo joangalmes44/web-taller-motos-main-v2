@@ -1,12 +1,7 @@
-import { supabase } from '@/lib/supabase';
+﻿import { supabase } from '@/lib/supabase';
 
-// "a.b.example" → "b.example": enough to tell another site's frame (a guess the wrong way only costs the new-tab notice)
 const siteOf = (host: string) => host.split('.').slice(-2).join('.');
 
-/**
- * loginfix: the app runs inside a frame of another site (another domain framing the published app), where the browser
- * keeps only a partitioned session cookie. A frame of the same site keeps the normal one.
- */
 export function crossSiteFrame(): boolean {
   if (typeof window === 'undefined' || window.top === window.self) return false;
   const ancestors = window.location.ancestorOrigins as DOMStringList | undefined;
@@ -18,32 +13,53 @@ export function crossSiteFrame(): boolean {
   }
 }
 
-/**
- * framesess: server actions and pages inside that frame carry no FRAME_HEADER, so a session they re-issue (changePassword
- * with revokeOtherSessions, a refreshed cookie cache) came back SameSite=Lax and the frame dropped it. This cookie lives
- * only in the frame's partition (never in the app's own tab) and tells src/lib/auth.ts the same thing on every request.
- */
-if (crossSiteFrame()) document.cookie = '__Host-tlm_frame=1; Path=/; Secure; SameSite=None; Partitioned';
+if (typeof document !== 'undefined' && crossSiteFrame()) {
+  document.cookie = '__Host-tlm_frame=1; Path=/; Secure; SameSite=None; Partitioned';
+}
+
+function syncCookie(token?: string | null) {
+  if (typeof document === 'undefined') return;
+  if (token) {
+    document.cookie = `sb-auth-token=${encodeURIComponent(token)}; Path=/; Max-Age=604800; SameSite=Lax`;
+  } else {
+    document.cookie = 'sb-auth-token=; Path=/; Max-Age=0; SameSite=Lax';
+  }
+}
+
+if (typeof window !== 'undefined') {
+  supabase.auth.onAuthStateChange((_event, session) => {
+    syncCookie(session?.access_token ?? null);
+  });
+}
 
 export const signIn = {
-  email: async ({ email, password }: { email: string; password: string }) =>
-    supabase.auth.signInWithPassword({ email, password }),
+  email: async ({ email, password }: { email: string; password: string }) => {
+    const res = await supabase.auth.signInWithPassword({ email, password });
+    if (res.data?.session?.access_token) syncCookie(res.data.session.access_token);
+    return res;
+  },
   social: async ({ provider, callbackURL }: { provider: 'google'; callbackURL: string }) =>
     supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}${callbackURL}` } }),
 };
 
 export const signUp = {
-  email: async ({ email, password, name }: { email: string; password: string; name?: string }) =>
-    supabase.auth.signUp({ email, password, options: { data: { name: name ?? '' } } }),
+  email: async ({ email, password, name }: { email: string; password: string; name?: string }) => {
+    const res = await supabase.auth.signUp({ email, password, options: { data: { name: name ?? '' } } });
+    if (res.data?.session?.access_token) syncCookie(res.data.session.access_token);
+    return res;
+  },
 };
 
-export const signOut = () => supabase.auth.signOut();
+export const signOut = async () => {
+  syncCookie(null);
+  return supabase.auth.signOut();
+};
 export const getSession = () => supabase.auth.getSession();
 export const useSession = () => supabase.auth.onAuthStateChange;
 
 export const updateUser = (attributes: { name?: string }) =>
   supabase.auth.updateUser({ data: { name: attributes.name } });
-export const deleteUser = () => supabase.auth.signOut();
+export const deleteUser = () => signOut();
 export const changePassword = async ({ password }: { password: string }) =>
   supabase.auth.updateUser({ password });
 
@@ -54,10 +70,6 @@ export const emailOtp = {
   resetPassword: async ({ password }: { password: string }) => supabase.auth.updateUser({ password }),
 };
 
-/**
- * After a sign-in inside a frame: did the browser keep the session? Some browsers (Safari, in-app browsers, strict
- * privacy settings) refuse every cookie in another site's frame; then only a tab of its own signs in.
- */
 export async function sessionKept(): Promise<boolean> {
   const { data } = await supabase.auth.getSession();
   return !!data.session;
