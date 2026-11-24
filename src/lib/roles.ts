@@ -46,13 +46,17 @@ export async function currentRol(): Promise<PerfilActual | null> {
   };
 }
 
-export function tieneRol(rolActual: Rol, permitidos: Rol[]): boolean {
+export function tieneRol(rolActual?: Rol | null, permitidos?: Rol[]): boolean {
+  if (!rolActual) return false;
+  if (!Array.isArray(permitidos)) return true;
   return permitidos.includes(rolActual);
 }
 
-export async function requireRol(permitidos: Rol[]): Promise<PerfilActual> {
+export async function requireRol(permitidos?: Rol[]): Promise<PerfilActual> {
   const perfil = await currentRol();
   if (!perfil) redirect('/login');
-  if (!permitidos.includes(perfil.rol)) redirect('/panel');
+  if (Array.isArray(permitidos) && !permitidos.includes(perfil.rol)) {
+    redirect('/panel');
+  }
   return perfil;
 }
