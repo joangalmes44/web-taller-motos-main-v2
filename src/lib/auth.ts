@@ -33,5 +33,5 @@ export async function currentSession() {
   if (!bearer) return null;
   const supabase = getAuth(new Request('http://localhost', { headers: { authorization: `Bearer ${bearer}` } }));
   const { data, error } = await supabase.auth.getUser(bearer);
-  return error ? null : { user: data.user };
+  if (error || !data.user) return null; const u = data.user as any; u.name = u.user_metadata?.name || u.email?.split("@")[0] || "Usuario"; return { user: u };
 }
