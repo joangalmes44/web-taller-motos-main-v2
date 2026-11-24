@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 
@@ -14,7 +14,7 @@ export default async function ServiciosPage() {
 
   if (!url || !key) {
     return (
-      <AppPage title="Servicios y precios" description="Error de configuración">
+      <AppPage title="Servicios y precios" description="Error de configuraciÃ³n">
         <pre className="border-2 border-red-600 bg-red-50 p-4 text-sm text-red-900">
           Faltan variables de entorno en Vercel: URL={String(Boolean(url))}, KEY={String(Boolean(key))}
         </pre>
@@ -31,23 +31,6 @@ export default async function ServiciosPage() {
 
   const svs = resSvs.data ?? [];
   const tarifas = resTarifas.data ?? [];
-
-  if (svs.length === 0) {
-    return (
-      <AppPage title="Servicios y precios" description="Diagnóstico de conexión">
-        <pre className="border-2 border-amber-600 bg-amber-50 p-4 text-xs text-zinc-900 whitespace-pre-wrap">
-{JSON.stringify({
-  supabaseUrl: url,
-  keyPrefix: key.slice(0, 18) + '...',
-  errorServicios: resSvs.error,
-  errorTarifas: resTarifas.error,
-  filasServicios: svs.length,
-  filasTarifas: tarifas.length,
-}, null, 2)}
-        </pre>
-      </AppPage>
-    );
-  }
 
   return (
     <AppPage
