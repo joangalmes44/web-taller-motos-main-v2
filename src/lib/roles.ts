@@ -1,5 +1,8 @@
-﻿import { supabase } from '@/db';
+﻿import { redirect } from 'next/navigation';
+import { supabase } from '@/db';
 import { currentUser } from './auth';
+
+export { currentUser };
 
 export type Rol = 'cliente' | 'mecanico' | 'recepcion' | 'administracion';
 
@@ -42,4 +45,11 @@ export async function currentRol(): Promise<PerfilActual | null> {
 
 export function tieneRol(rolActual: Rol, permitidos: Rol[]): boolean {
   return permitidos.includes(rolActual);
+}
+
+export async function requireRol(permitidos: Rol[]): Promise<PerfilActual> {
+  const perfil = await currentRol();
+  if (!perfil) redirect('/login');
+  if (!permitidos.includes(perfil.rol)) redirect('/panel');
+  return perfil;
 }
