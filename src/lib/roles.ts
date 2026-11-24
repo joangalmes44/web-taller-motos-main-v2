@@ -1,8 +1,6 @@
 ﻿import { redirect } from 'next/navigation';
 import { supabase } from '@/db';
-import { currentUser } from './auth';
-
-export { currentUser };
+import { currentSession } from './auth';
 
 export type Rol = 'cliente' | 'mecanico' | 'recepcion' | 'administracion';
 
@@ -13,12 +11,17 @@ export interface PerfilActual {
   rol: Rol;
 }
 
+export async function currentUser() {
+  const session = await currentSession();
+  return session?.user ?? null;
+}
+
 export async function currentRol(): Promise<PerfilActual | null> {
   const user = await currentUser();
   if (!user) return null;
 
   let rol: Rol = 'cliente';
-  let nombre = user.name || user.email.split('@')[0] || 'Usuario';
+  let nombre = user.name || user.email?.split('@')[0] || 'Usuario';
 
   if (supabase) {
     const { data: perfil } = await supabase
@@ -37,7 +40,7 @@ export async function currentRol(): Promise<PerfilActual | null> {
 
   return {
     userId: user.id,
-    email: user.email,
+    email: user.email ?? '',
     nombre,
     rol,
   };
