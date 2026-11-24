@@ -1,7 +1,7 @@
 // Reglas de stock, bodegaje y pedidos en un solo lugar. El stock nunca se guarda: se suma desde el kardex (movimientos_stock).
 import { inArray, sql, type SQL } from '@/db/compat';
 
-import { db } from '@/db';
+import { db, getSupabaseAdmin } from '@/db';
 import { movimientosStock, repuestos } from '@/db/schema';
 import { ahoraCL, diaSemana, sumarDias } from '@/lib/agenda';
 import { uuid } from '@/lib/uuid';
@@ -19,7 +19,7 @@ export const numeroCompra = (n: number) => `OC-${String(n).padStart(4, '0')}`;
 export const COMPRA_TONO = { Borrador: 'gray', Enviada: 'blue', 'Recibida parcial': 'amber', Recibida: 'green', Anulada: 'gray' } as const;
 export const REP_TONO = { Reservado: 'green', 'Esperando abono': 'amber', Pedido: 'amber', Usado: 'gray', Liberado: 'gray' } as const;
 
-/** Bodegaje: pasados 3 días hábiles (lunes a viernes) desde que quedó «Lista para retirar», $3.000 por cada día hábil más. */
+/** Bodegaje: pasados 3 dias habiles (lunes a viernes) desde que quedo «Lista para retirar», $3.000 por cada dia habil mas. */
 export function bodegaje(listaEnIso: string | null | undefined, ahora = new Date()): { habiles: number; dias: number; clp: number; gratisHasta: string | null } {
   if (!listaEnIso) return { habiles: 0, dias: 0, clp: 0, gratisHasta: null };
   const desde = ahoraCL(new Date(listaEnIso)).slice(0, 10);
@@ -49,25 +49,53 @@ export async function stockDe(ids: string[]) {
 }
 
 const ahoraIso = () => new Date().toISOString();
+const stmt = (fn: () => Promise<void>) => ({ execute: fn });
 
-/** Pedido a un proveedor para una orden: compra «Enviada» (o una ya creada en esta misma tanda) con su renglón. */
-export function pedidoStmts(a: { compraId: string; crearCompra: boolean; proveedorId: string; ordenId: string; ordenRepuestoId: string; repuestoId: string; cantidad: number; costo: number; nota: string; guard: SQL }) {
+/** Pedido a un proveedor para una orden: compra «Enviada» (o una ya creada en esta misma tanda) con su renglon. */
+export function pedidoStmts(a: { compraId: string; crearCompra: boolean; proveedorId: string; ordenId: string; ordenRepuestoId: string; repuestoId: string; cantidad: number; costo: number; nota: string; guard?: SQL }) {
   const ahora = ahoraIso();
-  const s: unknown[] = [];
+  const s: { execute: () => Promise<void> }[] = [];
   if (a.crearCompra) {
-    s.push(db.run(sql`insert into compras (id, numero, proveedor_id, estado, orden_id, nota, creado_en, enviada_en) select ${a.compraId}, (select coalesce(max(numero),0)+1 from compras), ${a.proveedorId}, 'Enviada', ${a.ordenId}, ${a.nota}, ${ahora}, ${ahora} where ${a.guard}`));
+    s.push(stmt(async () => {
+      const supa = getSupabaseAdmin();
+      const { data: maxC } = await supa.from('compras').select('numero').order('numero', { ascending: false }).limit(1).maybeSingle();
+      const nextNum = ((maxC?.numero as number | undefined) ?? 0) + 1;
+      const { error } = await supa.from('compras').upsert({
+        id: a.compraId,
+        numero: nextNum,
+        proveedor_id: a.proveedorId,
+        estado: 'Enviada',
+        orden_id: a.ordenId,
+        nota: a.nota,
+        creado_en: ahora,
+        enviada_en: ahora,
+      }, { onConflict: 'id', ignoreDuplicates: true });
+      if (error) throw error;
+    }));
   }
-  s.push(db.run(sql`insert into compra_items (id, compra_id, repuesto_id, orden_repuesto_id, cantidad, recibida, costo_clp) select ${uuid()}, ${a.compraId}, ${a.repuestoId}, ${a.ordenRepuestoId}, ${a.cantidad}, 0, ${a.costo} where ${a.guard}`));
+  s.push(stmt(async () => {
+    const supa = getSupabaseAdmin();
+    const { error } = await supa.from('compra_items').insert({
+      id: uuid(),
+      compra_id: a.compraId,
+      repuesto_id: a.repuestoId,
+      orden_repuesto_id: a.ordenRepuestoId,
+      cantidad: a.cantidad,
+      recibida: 0,
+      costo_clp: a.costo,
+    });
+    if (error) throw error;
+  }));
   return s;
 }
 
 export type ItemPlan = { repuestoId: string; cantidad: number; precio: number };
 
 /**
- * Qué pasa con cada repuesto que se suma a una orden: con stock se reserva; especial sin stock pide abono del 50 %;
- * normal sin stock genera el pedido al proveedor. Devuelve las sentencias (todas condicionadas por `guard`).
+ * Que pasa con cada repuesto que se suma a una orden: con stock se reserva; especial sin stock pide abono del 50 %;
+ * normal sin stock genera el pedido al proveedor. Devuelve las sentencias ejecutables en db.batch.
  */
-export async function planRepuestos(a: { ordenId: string; ordenNumero: string; adicionalId: string | null; items: ItemPlan[]; guard: SQL; idBase?: string }) {
+export async function planRepuestos(a: { ordenId: string; ordenNumero: string; adicionalId: string | null; items: ItemPlan[]; guard?: SQL; idBase?: string }) {
   const juntos = new Map<string, ItemPlan>();
   for (const it of a.items) {
     const prev = juntos.get(it.repuestoId);
@@ -79,7 +107,7 @@ export async function planRepuestos(a: { ordenId: string; ordenNumero: string; a
     ids.length ? db.select().from(repuestos).where(inArray(repuestos.id, ids)) : Promise.resolve([]),
     stockDe(ids),
   ]);
-  const stmts: unknown[] = [];
+  const stmts: { execute: () => Promise<void> }[] = [];
   const comprasPorProv = new Map<string, string>();
   const avisos: string[] = [];
   let espera = false;
@@ -90,12 +118,34 @@ export async function planRepuestos(a: { ordenId: string; ordenNumero: string; a
     if (!r) continue;
     const orpId = a.idBase ? `${a.idBase}:${String(i++)}` : uuid();
     const disp = stock.get(r.id)?.disponible ?? 0;
-    const base = (estado: string) =>
-      db.run(sql`insert into orden_repuestos (id, orden_id, repuesto_id, adicional_id, cantidad, precio_clp, estado) select ${orpId}, ${a.ordenId}, ${r.id}, ${a.adicionalId}, ${it.cantidad}, ${it.precio}, ${estado} where ${a.guard}`);
+    const base = (estado: string) => stmt(async () => {
+      const supa = getSupabaseAdmin();
+      const { error } = await supa.from('orden_repuestos').upsert({
+        id: orpId,
+        orden_id: a.ordenId,
+        repuesto_id: r.id,
+        adicional_id: a.adicionalId,
+        cantidad: it.cantidad,
+        precio_clp: it.precio,
+        estado,
+      }, { onConflict: 'id', ignoreDuplicates: true });
+      if (error) throw error;
+    });
     if (disp >= it.cantidad) {
       stmts.push(
         base('Reservado'),
-        db.run(sql`insert into movimientos_stock (id, repuesto_id, tipo, cantidad, nota, orden_id) select ${uuid()}, ${r.id}, 'reserva', ${it.cantidad}, ${`Reservado para ${a.ordenNumero}`}, ${a.ordenId} where ${a.guard}`),
+        stmt(async () => {
+          const supa = getSupabaseAdmin();
+          const { error } = await supa.from('movimientos_stock').insert({
+            id: uuid(),
+            repuesto_id: r.id,
+            tipo: 'reserva',
+            cantidad: it.cantidad,
+            nota: `Reservado para ${a.ordenNumero}`,
+            orden_id: a.ordenId,
+          });
+          if (error) throw error;
+        }),
       );
     } else if (r.especial) {
       const abono = Math.ceil((it.precio * it.cantidad * ABONO_ESPECIAL_PCT) / 100);
@@ -103,7 +153,18 @@ export async function planRepuestos(a: { ordenId: string; ordenNumero: string; a
       espera = true;
       stmts.push(
         base('Esperando abono'),
-        db.run(sql`insert into abonos (id, orden_id, orden_repuesto_id, concepto, requerido_clp, estado) select ${uuid()}, ${a.ordenId}, ${orpId}, ${`Abono del ${String(ABONO_ESPECIAL_PCT)} % de ${r.nombre}`}, ${abono}, 'Pendiente' where ${a.guard}`),
+        stmt(async () => {
+          const supa = getSupabaseAdmin();
+          const { error } = await supa.from('abonos').insert({
+            id: uuid(),
+            orden_id: a.ordenId,
+            orden_repuesto_id: orpId,
+            concepto: `Abono del ${String(ABONO_ESPECIAL_PCT)} % de ${r.nombre}`,
+            requerido_clp: abono,
+            estado: 'Pendiente',
+          });
+          if (error) throw error;
+        }),
       );
       avisos.push(`${r.nombre} es un repuesto especial y no hay en stock: hace falta un abono de $${abono.toLocaleString('es-CL')} antes de pedirlo.`);
     } else {
@@ -112,8 +173,8 @@ export async function planRepuestos(a: { ordenId: string; ordenNumero: string; a
       const ya = comprasPorProv.get(prov);
       const compraId = ya ?? (a.idBase ? `${a.idBase}:c${prov}` : uuid());
       comprasPorProv.set(prov, compraId);
-      stmts.push(base('Pedido'), ...pedidoStmts({ compraId, crearCompra: !ya, proveedorId: prov, ordenId: a.ordenId, ordenRepuestoId: orpId, repuestoId: r.id, cantidad: it.cantidad, costo: r.costoClp, nota: `Pedido por ${a.ordenNumero}`, guard: a.guard }));
-      avisos.push(`${r.nombre} no tiene stock: ya se pidió al proveedor.`);
+      stmts.push(base('Pedido'), ...pedidoStmts({ compraId, crearCompra: !ya, proveedorId: prov, ordenId: a.ordenId, ordenRepuestoId: orpId, repuestoId: r.id, cantidad: it.cantidad, costo: r.costoClp, nota: `Pedido por ${a.ordenNumero}` }));
+      avisos.push(`${r.nombre} no tiene stock: ya se pidio al proveedor.`);
     }
   }
   return { stmts, espera, abonoTotal, avisos };
