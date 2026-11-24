@@ -11,7 +11,7 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT rol FROM public.perfiles WHERE user_id = auth.uid() LIMIT 1;
+  SELECT rol::text FROM public.perfiles WHERE user_id = auth.uid() LIMIT 1;
 $$;
 
 CREATE OR REPLACE FUNCTION public.current_mecanico_id()
@@ -21,7 +21,7 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT id FROM public.mecanicos WHERE user_id = auth.uid() LIMIT 1;
+  SELECT id::text FROM public.mecanicos WHERE user_id = auth.uid() LIMIT 1;
 $$;
 
 REVOKE ALL ON FUNCTION public.current_app_rol() FROM PUBLIC;
@@ -74,13 +74,13 @@ CREATE POLICY "perfiles_select_own_or_staff" ON public.perfiles
 
 CREATE POLICY "perfiles_insert_own" ON public.perfiles
   FOR INSERT TO authenticated
-  WITH CHECK (user_id = auth.uid() AND rol = 'cliente');
+  WITH CHECK (user_id = auth.uid() and rol::text = 'cliente');
 
 CREATE POLICY "perfiles_update_own_or_admin" ON public.perfiles
   FOR UPDATE TO authenticated
   USING (user_id = auth.uid() OR public.current_app_rol() = 'administracion')
   WITH CHECK (
-    (user_id = auth.uid() AND rol = public.current_app_rol())
+    (user_id = auth.uid() and rol::text = public.current_app_rol())
     OR public.current_app_rol() = 'administracion'
   );
 
@@ -174,7 +174,7 @@ CREATE POLICY "ordenes_select_policy" ON public.ordenes
   FOR SELECT TO authenticated
   USING (
     user_id = auth.uid()
-    OR (public.current_app_rol() = 'mecanico' AND mecanico_id = public.current_mecanico_id())
+    OR (public.current_app_rol() = 'mecanico' AND mecanico_id::text = public.current_mecanico_id())
     OR public.current_app_rol() IN ('recepcion', 'administracion')
   );
 
@@ -185,7 +185,7 @@ CREATE POLICY "ordenes_insert_staff" ON public.ordenes
 CREATE POLICY "ordenes_update_policy" ON public.ordenes
   FOR UPDATE TO authenticated
   USING (
-    (public.current_app_rol() = 'mecanico' AND mecanico_id = public.current_mecanico_id())
+    (public.current_app_rol() = 'mecanico' AND mecanico_id::text = public.current_mecanico_id())
     OR public.current_app_rol() IN ('recepcion', 'administracion')
   );
 
@@ -198,7 +198,7 @@ CREATE POLICY "orden_historial_select" ON public.orden_historial
       WHERE o.id = orden_historial.orden_id
         AND (
           o.user_id = auth.uid()
-          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id = public.current_mecanico_id())
+          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id::text = public.current_mecanico_id())
           OR public.current_app_rol() IN ('recepcion', 'administracion')
         )
     )
@@ -212,7 +212,7 @@ CREATE POLICY "orden_historial_insert" ON public.orden_historial
       WHERE o.id = orden_historial.orden_id
         AND (
           o.user_id = auth.uid()
-          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id = public.current_mecanico_id())
+          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id::text = public.current_mecanico_id())
           OR public.current_app_rol() IN ('recepcion', 'administracion')
         )
     )
@@ -226,7 +226,7 @@ CREATE POLICY "adicionales_select" ON public.adicionales
       WHERE o.id = adicionales.orden_id
         AND (
           o.user_id = auth.uid()
-          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id = public.current_mecanico_id())
+          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id::text = public.current_mecanico_id())
           OR public.current_app_rol() IN ('recepcion', 'administracion')
         )
     )
@@ -235,7 +235,7 @@ CREATE POLICY "adicionales_select" ON public.adicionales
 CREATE POLICY "adicionales_insert_mecanico_staff" ON public.adicionales
   FOR INSERT TO authenticated
   WITH CHECK (
-    (public.current_app_rol() = 'mecanico' AND mecanico_id = public.current_mecanico_id())
+    (public.current_app_rol() = 'mecanico' AND mecanico_id::text = public.current_mecanico_id())
     OR public.current_app_rol() IN ('recepcion', 'administracion')
   );
 
@@ -247,7 +247,7 @@ CREATE POLICY "adicionales_update_cliente_or_staff" ON public.adicionales
       WHERE o.id = adicionales.orden_id
         AND (
           o.user_id = auth.uid()
-          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id = public.current_mecanico_id())
+          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id::text = public.current_mecanico_id())
           OR public.current_app_rol() IN ('recepcion', 'administracion')
         )
     )
@@ -262,7 +262,7 @@ CREATE POLICY "adicional_repuestos_policy" ON public.adicional_repuestos
       WHERE a.id = adicional_repuestos.adicional_id
         AND (
           o.user_id = auth.uid()
-          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id = public.current_mecanico_id())
+          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id::text = public.current_mecanico_id())
           OR public.current_app_rol() IN ('recepcion', 'administracion')
         )
     )
@@ -276,7 +276,7 @@ CREATE POLICY "orden_repuestos_policy" ON public.orden_repuestos
       WHERE o.id = orden_repuestos.orden_id
         AND (
           o.user_id = auth.uid()
-          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id = public.current_mecanico_id())
+          OR (public.current_app_rol() = 'mecanico' AND o.mecanico_id::text = public.current_mecanico_id())
           OR public.current_app_rol() IN ('recepcion', 'administracion')
         )
     )
@@ -348,4 +348,5 @@ CREATE POLICY "recibos_write_staff" ON public.recibos
   FOR ALL TO authenticated
   USING (public.current_app_rol() IN ('recepcion', 'administracion'))
   WITH CHECK (public.current_app_rol() IN ('recepcion', 'administracion'));
+
 
