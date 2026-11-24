@@ -2,6 +2,26 @@
 
 Web para un taller de motos en Chile: reservas con agenda, órdenes de trabajo, repuestos y compras, caja con recibos internos (sin valor fiscal, desde 0001), garantías, liquidaciones e informes. Moneda: pesos chilenos.
 
+
+## Usuarios Testing
+CLIENTE
+cliente@test.com
+adminadmin
+
+MECÁNICO
+mecanico@test.com
+adminadmin
+
+RECEPCION
+recepcion@test.com
+adminadmin
+
+ADMINISTRACION
+administracion@test.com
+adminadmin
+
+
+
 ## Configuración con Supabase
 
 1. Creá un proyecto en [Supabase](https://supabase.com).
