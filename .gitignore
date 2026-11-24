@@ -22,3 +22,7 @@ out/
 *.keystore
 .tmp-dialect-*/
 AGENTS.md
+
+.env
+.env.local
+.env*.local

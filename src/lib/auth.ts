@@ -2,8 +2,11 @@
 import { createClient } from '@supabase/supabase-js';
 
 function config() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://sfflmlpkoutpiscoopnx.supabase.co';
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_JSf9dHPMpC8L3mlxtYkT9A_jclqOsrm';
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    throw new Error('Faltan NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en las variables de entorno');
+  }
   return { url, key };
 }
 
@@ -33,5 +36,8 @@ export async function currentSession() {
   if (!bearer) return null;
   const supabase = getAuth(new Request('http://localhost', { headers: { authorization: `Bearer ${bearer}` } }));
   const { data, error } = await supabase.auth.getUser(bearer);
-  if (error || !data.user) return null; const u = data.user as any; u.name = u.user_metadata?.name || u.email?.split("@")[0] || "Usuario"; return { user: u };
+  if (error || !data.user) return null;
+  const u = data.user as any;
+  u.name = u.user_metadata?.name || u.email?.split('@')[0] || 'Usuario';
+  return { user: u };
 }
