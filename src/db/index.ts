@@ -98,6 +98,30 @@ class SupabaseBuilder implements PromiseLike<any[]> {
     return query;
   }
 
+  private project(rows: any[]): any[] {
+    const toCamel = (s: string) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+    const mapRow = (row: Record<string, any>) => {
+      const out: Record<string, any> = {};
+      for (const [k, v] of Object.entries(row ?? {})) {
+        out[k] = v;
+        out[toCamel(k)] = v;
+      }
+      return out;
+    };
+    if (!this._projection || typeof this._projection !== 'object') {
+      return rows.map(mapRow);
+    }
+    return rows.map((row) => {
+      const mapped = mapRow(row);
+      const out: Record<string, any> = {};
+      for (const [alias, spec] of Object.entries(this._projection as Record<string, any>)) {
+        const col = typeof spec === 'string' ? spec : spec?.column ?? spec?.field ?? alias;
+        out[alias] = mapped[col] ?? mapped[toCamel(col)];
+      }
+      return out;
+    });
+  }
+
   async execute(): Promise<any[]> {
     let activeClient = this.client;
     try {
